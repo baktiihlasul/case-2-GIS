@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Peta Leaflet - Museum Palagan Bojongkokosan</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    #map { width: 100%; height: 800px; }
+  </style>
+</head>
+<body>
+  <h2>Peta Museum Palagan Bojongkokosan</h2>
+  <div id="map"></div>
+
+  <script>
+
+    var lat = -6.825301350614936;
+    var lon = 106.76022763456074;
+
+
+    var map = L.map('map').setView([lat, lon], 17);
+
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+
+    fetch('museum.geojson')
+      .then(response => response.json())
+      .then(data => {
+        var geoLayer = L.geoJSON(data, {
+          style: function(feature) {
+            if (feature.geometry.type === "LineString") {
+              return { color: "blue", weight: 5 };
+            } else if (feature.geometry.type === "Polygon") {
+              return { color: "green", fillColor: "yellow", fillOpacity: 0.5 };
+            }
+          },
+          pointToLayer: function(feature, latlng) {
+            return L.marker(latlng);
+          },
+          onEachFeature: function(feature, layer) {
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup(feature.properties.name);
+            }
+          }
+        }).addTo(map);
+
+        map.fitBounds(geoLayer.getBounds());
+      })
+      .catch(err => console.error("Gagal memuat GeoJSON:", err));
+  </script>
+</body>
+</html>
+</html>
